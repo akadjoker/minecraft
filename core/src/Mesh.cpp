@@ -201,41 +201,6 @@ void Mesh::Init()
                 buffer->name = "NORMAL";
             //   Log(1,"NORMAL");
                 AddBuffer(buffer);
-            } else
-                
-            if (e.usage == VertexFormat::TANGENT) 
-            {
-                flags |= VBO_TANGENT;
-               
-                VertexBuffer * buffer = new VertexBuffer();
-                glGenBuffers(1, &buffer->id);
-                glBindBuffer(GL_ARRAY_BUFFER, buffer->id);
-    
-                glEnableVertexAttribArray(j);
-                glVertexAttribPointer(j, 3, GL_FLOAT, GL_FALSE, (GLint)sizeof(Vec3), 0);
-
-                buffer->size  = e.size;
-                buffer->usage = e.usage;
-                buffer->name = "TANGENT";
-                
-                AddBuffer(buffer);
-            } else          
-            if (e.usage == VertexFormat::COLOR)
-            {
-                flags |= VBO_COLOR;
-                VertexBuffer * buffer = new VertexBuffer();
-                glGenBuffers(1, &buffer->id);
-                glBindBuffer(GL_ARRAY_BUFFER, buffer->id);
-           
-                glEnableVertexAttribArray(j);
-               // glVertexAttribPointer(j, (GLint)e.size, GL_FLOAT, GL_FALSE, (GLint)e.size * sizeof(float), (void*)(0));
-                glVertexAttribPointer(j, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, 0);
-                buffer->size  = e.size;
-                buffer->usage = e.usage;
-                buffer->name = "COLOR";
-
-           
-                AddBuffer(buffer);
             } 
         }
 
@@ -413,52 +378,6 @@ void Mesh::Upload()
                 glBindBuffer(GL_ARRAY_BUFFER, buffer->id);
                 glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(Vec3), normals.data(), m_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
             }
-        }
-        else if (buffer->usage == VertexFormat::COLOR) 
-        {
-
-            if (colors.size() != positions.size()) 
-            {
-                for (size_t i = 0; i < positions.size(); ++i) 
-                {
-                    colors.push_back(255);colors.push_back(255);colors.push_back(255);colors.push_back(255);                
-                }
-            }
-
-            glBindBuffer(GL_ARRAY_BUFFER, buffer->id);
-            glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(unsigned char), colors.data(), m_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
-        }
-        else if (buffer->usage == VertexFormat::TANGENT) 
-        {
-            if (flags & VBO_TANGENT) 
-            {
-                if (tangents.size() != positions.size()) 
-                {
-                    for (size_t i = 0; i < positions.size(); ++i) 
-                    {
-                        tangents.push_back(Vec3(0.0f, 0.0f, 0.0f));
-                    }
-                }
-
-            }
-     
-            glBindBuffer(GL_ARRAY_BUFFER, buffer->id);
-            glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(Vec3), &tangents[0], m_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
-        } else if (buffer->usage == VertexFormat::BITANGENT) 
-        {
-            if (flags & VBO_BITANGENT) 
-            {
-                if (bitangents.size() != positions.size()) 
-                {
-                    for (size_t i = 0; i < positions.size(); ++i) 
-                    {
-                        bitangents.push_back(Vec3(0.0f, 0.0f, 0.0f));
-                    }
-                }
-            }
-   
-            glBindBuffer(GL_ARRAY_BUFFER, buffer->id);
-            glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(Vec3), &bitangents[0], m_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
         }
     }
 
@@ -711,7 +630,6 @@ void Mesh::Clear()
     normals.clear();
     texCoords.clear();
     indices.clear();
-    colors.clear();
     m_boundingBox.Clear();
 }
 
@@ -766,66 +684,6 @@ void Mesh::CalculateSmothNormals(bool angleWeighted)
   
 }
 
-void Mesh::CalculateTangents()
-{
-
-    tangents.resize(positions.size(), Vec3(0.0f));
-    bitangents.resize(positions.size(), Vec3(0.0f));
-
-    for (size_t i = 0; i < indices.size(); i += 3) 
-    {
-        unsigned int index0 = indices[i];
-        unsigned int index1 = indices[i + 1];
-        unsigned int index2 = indices[i + 2];
-
-        Vec3 edge1 = positions[index1] - positions[index0];
-        Vec3 edge2 = positions[index2] - positions[index0];
-
-        Vec2 deltaUV1 = texCoords[index1] - texCoords[index0];
-        Vec2 deltaUV2 = texCoords[index2] - texCoords[index0];
-
-        float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
-
-        Vec3 tangent(
-            f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
-            f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
-            f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z)
-        );
-
-        Vec3 bitangent(
-            f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x),
-            f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y),
-            f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z)
-        );
-
-        tangent.normalize();
-        bitangent.normalize();
-
-        tangents[index0] += tangent;
-        tangents[index1] += tangent;
-        tangents[index2] += tangent;
-
-        bitangents[index0] += bitangent;
-        bitangents[index1] += bitangent;
-        bitangents[index2] += bitangent;
-    }
-
-    // Ortogonalizar e normalizar os vetores tangentes e bitangentes
-    for (size_t i = 0; i < positions.size(); ++i) 
-    {
-        const Vec3& normal = normals[i];
-        const Vec3& tangent = tangents[i];
-        const Vec3& bitangent = bitangents[i];
-
-        // Projeta a tangente e a bitangente no plano tangente (ortogonal a normal)
-        tangents[i] = (tangent - normal * normal.dot(tangent)).normalized();
-
-        // Calcula a direção correta para a bitangente
-        bitangents[i] = (bitangent - normal * normal.dot(bitangent) - tangent * tangent.dot(bitangent)).normalized();
-    }
-
-
-}
 void Mesh::CalculateBoundingBox()
 {
     m_boundingBox.Clear();

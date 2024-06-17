@@ -45,15 +45,6 @@ struct CORE_PUBLIC Material
 
 
 
-struct SkinVertex
-{
-    Vec3 pos;
-    Vec3 normal;
-    Vec2 uv;
-    int bones[MAX_BONE_INFLUENCE];
-    float weights[MAX_BONE_INFLUENCE];
-};
-
 
 class  CORE_PUBLIC  VertexFormat
 {
@@ -121,8 +112,6 @@ enum PrimitiveType
     };
 
 
-
-class Scene;
 
 class  CORE_PUBLIC  Mesh
 {
@@ -194,7 +183,7 @@ class  CORE_PUBLIC  Mesh
 
     void CalculateSmothNormals(bool angleWeighted=false);
 
-    void CalculateTangents();
+   
 
     void CalculateBoundingBox();
 
@@ -247,10 +236,7 @@ private:
     std::vector<Vec3> positions;
     std::vector<Vec3> normals;
     std::vector<Vec2> texCoords;
-    std::vector<Vec3> tangents;
-    std::vector<Vec3> bitangents;
-    
-    std::vector<unsigned char> colors;
+
     std::vector<unsigned int> indices;
     std::vector<VertexBuffer*> buffers;
  

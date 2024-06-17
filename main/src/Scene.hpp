@@ -7,10 +7,8 @@
 #include "Config.hpp"
 #include "Math.hpp"
 #include "Texture.hpp"
-#include "SceneNode.hpp"
-#include "Animation.hpp"
 #include "Buffer.hpp"
-
+#include "Mesh.hpp"
 const int SHADOW_MAP_CASCADE_COUNT = 4;
   
 

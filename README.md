@@ -4,13 +4,9 @@ Opengl MineCraft
     OpenGL Graphics Engine: Advanced rendering using OpenGL.
     
     Cascade Shadow Maps: Implementation of 4 cascade shadow maps for high-quality shadows.
-
    
     Post-Processing Effects: Post-processing effects including blur and bloom.
     
-     
-   
-
 
 
 License

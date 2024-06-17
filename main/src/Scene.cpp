@@ -205,7 +205,7 @@ void Scene::Render()
     // }
 
 
-    }
+    
     if (USE_BLOOM)
         renderTexture.End();
 
