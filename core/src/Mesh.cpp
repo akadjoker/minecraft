@@ -209,6 +209,22 @@ void Mesh::Init()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void Mesh::FlipWindingOrder()
+{
+
+    const u32 idxcnt = (u32)indices.size();
+    if (idxcnt == 0) return;
+    unsigned int *idx = indices.data();
+    for (u32 i = 0; i < idxcnt; i += 3) 
+    {
+        const unsigned int tmp = idx[i+1];
+        idx[i+1] = idx[i + 2];
+        idx[i + 2] = tmp;
+    }
+    isDirty = true;
+    flags |= VBO_INDICES;
+}
+
 void Mesh::FlipFaces()
 {
     const u32 idxcnt = (u32)indices.size();

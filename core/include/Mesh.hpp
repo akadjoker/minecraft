@@ -131,6 +131,14 @@ class  CORE_PUBLIC  Mesh
     int AddVertex(const Vec3 &position);
     int AddVertex(float x, float y, float z);
 
+
+    int AddVertex(const Vec3 &position,const Vec2 &texCoord);
+    int AddVertex(float x, float y, float z, float u, float v);
+
+    int AddVertex(const Vec3 &position,const Vec2 &texCoord,const Vec3 &normal);
+    int AddVertex(float x, float y, float z, float u, float v, float nx, float ny, float nz);
+
+
     const void* GetVertices() const;
     void* GetVertices();
 
@@ -140,19 +148,17 @@ class  CORE_PUBLIC  Mesh
 
     void TexturePlanarMapping(float resolution=0.001f);
     void TexturePlanarMapping(float resolutionS, float resolutionT, u8 axis, const Vec3& offset);
-    //Changes backfacing triangles to frontfacing
+
+
+
+
+    void FlipWindingOrder();
     void FlipFaces();
     void FlipNormals();
 
 
 
 
-
-    int AddVertex(const Vec3 &position,const Vec2 &texCoord);
-    int AddVertex(float x, float y, float z, float u, float v);
-
-    int AddVertex(const Vec3 &position,const Vec2 &texCoord,const Vec3 &normal);
-    int AddVertex(float x, float y, float z, float u, float v, float nx, float ny, float nz);
 
 
 
@@ -203,9 +209,9 @@ class  CORE_PUBLIC  Mesh
 private:
     struct VertexBuffer
     {   
-        std::string      name;
-        s32         size;
-        s32         usage;
+        std::string          name;
+        s32                  size;
+        s32                  usage;
         unsigned int         id;
         VertexBuffer()
         {
